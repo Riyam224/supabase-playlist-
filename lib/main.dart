@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_playlist/core/helper/supabase_helper.dart';
-import 'package:supabase_playlist/features/auth/views/login_page.dart';
+import 'package:supabase_playlist/features/crud_db/views/todo_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: 'Login UI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.purple),
-      home: const LoginPage(),
+      home: const TodoScreen(),
     );
   }
 }

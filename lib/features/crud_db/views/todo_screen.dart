@@ -1,159 +1,163 @@
-// import 'dart:developer';
-// import 'package:flutter/material.dart';
-// import 'package:supabase_playlist/core/helper/supabase_helper.dart';
-// import 'package:supabase_playlist/features/crud_db/models/todo_model.dart';
+import 'dart:developer';
+import 'package:flutter/material.dart';
 
-// class TodoScreen extends StatefulWidget {
-//   const TodoScreen({super.key});
+import 'package:supabase_playlist/core/helper/supabase_helper.dart';
 
-//   @override
-//   State<TodoScreen> createState() => _TodoScreenState();
-// }
+class TodoScreen extends StatefulWidget {
+  const TodoScreen({super.key});
 
-// class _TodoScreenState extends State<TodoScreen> {
-//   final TextEditingController _controller = TextEditingController();
-//   List<Todo> _todos = [];
-//   bool isLoading = false;
+  @override
+  State<TodoScreen> createState() => _TodoScreenState();
+}
 
-//   /// ✅ Fetch all todos
-//   Future<void> readAllTodos() async {
-//     setState(() => isLoading = true);
-//     try {
-//       final result = await SupabaseHelper.client
-//           .from('todos')
-//           .select()
-//           .order('id', ascending: true);
+class _TodoScreenState extends State<TodoScreen> {
+  final TextEditingController _controller = TextEditingController();
+  List<Map<String, dynamic>> todos = [];
+  bool isLoading = false;
 
-//       _todos = (result as List)
-//           .map((item) => Todo.fromJson(item as Map<String, dynamic>))
-//           .toList();
+  // todo read all todos
 
-//       log('Todos fetched: ${_todos.length}');
-//     } catch (e) {
-//       log('Error fetching todos: $e');
-//     }
-//     setState(() => isLoading = false);
-//   }
+  Future readAllTodos() async {
+    setState(() => isLoading = true);
+    try {
+      final result = await SupabaseHelper.client
+          .from('todos')
+          .select()
+          .order('created_at', ascending: true);
 
-//   /// ✅ Insert new todo
-//   Future<void> insertTodo() async {
-//     final text = _controller.text.trim();
-//     if (text.isEmpty) return;
+      log('Fetched result: $result'); // Debug print to check
 
-//     try {
-//       final response = await SupabaseHelper.client.from('todos').insert({
-//         'title': text,
-//         'isDone': false, // ✅ matches your DB column
-//       }).select();
+      setState(() {
+        todos = (result as List)
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      log('Error fetching todos: $e');
+      setState(() => isLoading = false);
+    }
+  }
 
-//       readAllTodos();
+  // todo  insert todo
+  Future insertTodo() async {
+    try {
+      await SupabaseHelper.client.from('todos').insert({
+        'title': _controller.text,
+        'isDone': false,
+      });
 
-//       if (response.isNotEmpty) {
-//         final newTodo = Todo.fromJson(response.first);
-//         setState(() {
-//           _todos.add(newTodo);
-//         });
-//       }
-//     } catch (e) {
-//       log('Error creating todo: $e');
-//     }
+      await readAllTodos(); // refresh list
+    } catch (e) {
+      log('Error inserting todo: $e');
+    }
+    _controller.clear();
+  }
 
-//     _controller.clear();
-//   }
+  // todo update todo
 
-//   /// ✅ Update todo (toggle done)
-//   // Future<void> updateTodoStatus(Todo todo) async {
-//   //   try {
-//   //     await SupabaseHelper.client
-//   //         .from('todos')
-//   //         .update({'is_done': !todo.isDone})
-//   //         .eq('id', todo!.id.);
+  Future updateTodo(int id, String title, bool isDone) async {
+    try {
+      await SupabaseHelper.client
+          .from('todos')
+          .update({'title': title, 'isDone': isDone})
+          .eq('id', id);
 
-//   //     await readAllTodos();
-//   //   } catch (e) {
-//   //     log('Error updating todo: $e');
-//   //   }
-//   // }
+      await readAllTodos(); // refresh list
+    } catch (e) {
+      log('Error updating todo: $e');
+    }
+  }
 
-//   /// ✅ Delete todo
-//   // Future<void> deleteTodo(int id) async {
-//   //   try {
-//   //     await SupabaseHelper.client.from('todos').delete().eq('id', id);
-//   //     await readAllTodos();
-//   //     log('Todo deleted: $id');
-//   //   } catch (e) {
-//   //     log('Error deleting todo: $e');
-//   //   }
-//   // }
+  Future deleteTodo(int id) async {
+    try {
+      await SupabaseHelper.client.from('todos').delete().eq('id', id);
+      await readAllTodos(); // refresh list
+    } catch (e) {
+      log('Error deleting todo: $e');
+    }
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     readAllTodos();
-//   }
+  @override
+  void initState() {
+    super.initState();
+    readAllTodos();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text("Todos Screen"), centerTitle: true),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           children: [
-//             /// Input + Add button
-//             Row(
-//               children: [
-//                 Expanded(
-//                   child: TextField(
-//                     controller: _controller,
-//                     decoration: InputDecoration(
-//                       hintText: "Enter todo",
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(width: 10),
-//                 ElevatedButton(onPressed: insertTodo, child: const Text("Add")),
-//               ],
-//             ),
-//             const SizedBox(height: 20),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Todos Screen"), centerTitle: true),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            /// Input + Add button
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: "Enter todo",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // todo insert todo
+                ElevatedButton(onPressed: insertTodo, child: const Text("Add")),
+              ],
+            ),
+            const SizedBox(height: 20),
 
-//             /// Todo list
-//             Expanded(
-//               child: isLoading
-//                   ? const Center(child: CircularProgressIndicator())
-//                   : ListView.builder(
-//                       itemCount: _todos.length,
-//                       itemBuilder: (context, index) {
-//                         final todo = _todos[index];
-//                         return Card(
-//                           child: ListTile(
-//                             leading: Checkbox(
-//                               value: todo.isDone,
-//                               onChanged: (_) => {},
-//                             ),
-//                             title: Text(
-//                               todo.title,
-//                               style: TextStyle(
-//                                 decoration: todo.isDone
-//                                     ? TextDecoration.lineThrough
-//                                     : TextDecoration.none,
-//                               ),
-//                             ),
-//                             trailing: IconButton(
-//                               icon: const Icon(Icons.delete, color: Colors.red),
-//                               onPressed: () => {},
-//                             ),
-//                           ),
-//                         );
-//                       },
-//                     ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+            /// Todo list
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: todos.length,
+                      itemBuilder: (context, index) {
+                        final todo = todos[index];
+                        return Card(
+                          child: ListTile(
+                            // todo
+                            leading: Checkbox(
+                              value: todo['isDone'],
+                              onChanged: (value) {
+                                setState(() {
+                                  updateTodo(
+                                    todo['id'],
+                                    todo['title'],
+                                    value ?? false,
+                                  );
+                                });
+                              },
+                            ),
+                            title: Text(
+                              todo['title'],
+                              style: TextStyle(
+                                decoration: todo['isDone']
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                deleteTodo(todo['id']);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
