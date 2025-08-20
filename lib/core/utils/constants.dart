@@ -1,0 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
+const String SUPABASE_URL = 'https://dirvitawoefhxomiplgu.supabase.co';
+const String SUPABASE_ANON_KEY =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpcnZpdGF3b2VmaHhvbWlwbGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NzU2MjgsImV4cCI6MjA3MTI1MTYyOH0.JC_QLNNyP9RRYxj6ADPO7Cj8GZIcrSdoj0hxlMXIP2I';

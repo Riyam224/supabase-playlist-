@@ -1,0 +1,5 @@
+package com.example.supabase_playlist
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
