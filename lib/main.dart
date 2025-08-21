@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_playlist/core/helper/supabase_helper.dart';
-import 'package:supabase_playlist/features/crud_db/views/todo_screen.dart';
+import 'package:supabase_playlist/features/storage_bucket/views/storage_example_view.dart';
+import 'package:supabase_playlist/features/streaming/views/home_stream_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Login UI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.purple),
-      home: const TodoScreen(),
+      home: const TodoScreenStream(),
     );
   }
 }
